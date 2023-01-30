@@ -8,7 +8,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import math
 
-from scipy import stats
+from sklearn import preprocessing
 from scipy.stats import norm
 
 
@@ -55,4 +55,10 @@ for _ in range(d):
 
 fig.tight_layout()
 plt.show()
+
+nrmlz = preprocessing.MinMaxScaler()
+column_names = df.columns
+d = nrmlz.fit_transform(df)
+nrmlz_df = pd.DataFrame(d, columns=column_names)
+print(nrmlz_df.head())
 
