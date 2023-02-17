@@ -20,7 +20,7 @@ def r_squared(w, xT, yT):
     return (1 - (mse / variance))
 
 
-def loss(w, xT, yT, lambdaa):
+def loss_ridge(w, xT, yT, lambdaa):
     XT = xT.transpose()
     Y = yT.transpose()
     XTw = XT.dot(w)
@@ -30,3 +30,29 @@ def loss(w, xT, yT, lambdaa):
     regularizer = lambdaa * w.transpose().dot(w)
     loss = XTwMinusyT_XTwMinusy + regularizer
     return loss
+
+
+def loss_mse(w, xT, yT):
+    XT = xT.transpose()
+    Y = yT.transpose()
+    XTw = XT.dot(w)
+    XTwMinusy = XTw - Y
+    XTwMinusyT = XTwMinusy.transpose()
+    XTwMinusyT_XTwMinusy = XTwMinusyT.dot(XTwMinusy)
+    loss = XTwMinusyT_XTwMinusy
+    return loss
+
+
+def loss_mae(w, xT, yT):
+    XT = xT.transpose()
+    Y = yT.transpose()
+    XTw = XT.dot(w)
+    XTwMinusy = XTw - Y
+    XTwMinusyAbs = np.absolute(XTwMinusy)
+    loss = np.sum(XTwMinusyAbs)
+    return [[loss]]
+
+def do_predict(w, xT):
+    XT = xT.transpose()
+    XTw = XT.dot(w)
+    return XTw.reshape((1, -1))
