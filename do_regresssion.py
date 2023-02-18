@@ -74,11 +74,11 @@ def maereg(w,xTr,yTr):
     XT = xTr.transpose()
     Y = yTr.transpose()
     XTw = XT.dot(w)
-    XTwMinusy = XTw - Y
-    XTwMinusyAbs = np.absolute(XTwMinusy)
-    XTwMinusy_div_XTwMinusyAbs = np.divide(XTwMinusy,XTwMinusyAbs)
-    loss = np.sum(XTwMinusyAbs) / yTr.shape[1]
-    g_loss = xTr.dot(XTwMinusy_div_XTwMinusyAbs) / yTr.shape[1]
+    YMinusXTw = Y - XTw
+    YMinusXTwAbs = np.absolute(YMinusXTw)
+    YMinusXTwSign = np.sign(YMinusXTw)
+    loss = np.sum(YMinusXTwAbs) / yTr.shape[1]
+    g_loss = -1 * xTr.dot(YMinusXTwSign) / yTr.shape[1]
     gradient = g_loss.reshape((g_loss.shape[0],))
     gradient = gradient.reshape((-1, 1))
 

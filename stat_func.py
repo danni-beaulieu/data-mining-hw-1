@@ -56,3 +56,8 @@ def do_predict(w, xT):
     XT = xT.transpose()
     XTw = XT.dot(w)
     return XTw.reshape((1, -1))
+
+def do_split(df, nTest):
+    test = df.sample(n=nTest, axis=0, replace=False)
+    train = df.drop(index=test.index)
+    return train, test
