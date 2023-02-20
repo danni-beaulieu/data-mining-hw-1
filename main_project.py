@@ -1,4 +1,5 @@
 import math
+import sys
 
 import numpy as np
 import pandas as pd
@@ -50,7 +51,7 @@ def doKFold(func, X, y, stepparams, k):
     return stepparams[bestparam]
 
 
-def train_all(xTr, xTv, yTr, yTv, plots, description):
+def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed):
     bias = np.ones(shape=(1, xTr.shape[1]))
     xTr_bias = np.append(bias, xTr, axis=0)
     bias = np.ones(shape=(1, xTv.shape[1]))
@@ -71,6 +72,10 @@ def train_all(xTr, xTv, yTr, yTv, plots, description):
         plt.title("MSE Regression: Data vs Model")
         plt.xlabel("Feature " + description)
         plt.ylabel("Compressive Strength")
+        if (preprocessed):
+            plt.savefig('preprocessing-run/' + description + '.png', bbox_inches='tight')
+        else:
+            plt.savefig('non-preprocessing-run/' + description + '.png', bbox_inches='tight')
         plt.show()
 
     train_ridge_f = lambda x,y,lambdaa: train_ridge(x,y, mse_bestparam, lambdaa)
@@ -90,6 +95,10 @@ def train_all(xTr, xTv, yTr, yTv, plots, description):
         plt.title("Ridge Regression: Data vs Model")
         plt.xlabel("Feature " + description)
         plt.ylabel("Compressive Strength")
+        if (preprocessed):
+            plt.savefig('preprocessing-run/' + description + '.png', bbox_inches='tight')
+        else:
+            plt.savefig('non-preprocessing-run/' + description + '.png', bbox_inches='tight')
         plt.show()
 
     mae_bestparam = doKFold(train_mae, xTr_bias, yTr, [1e-02, 1e-03, 1e-04, 1e-05], 5)
@@ -107,6 +116,10 @@ def train_all(xTr, xTv, yTr, yTv, plots, description):
         plt.title("MAE Regression: Data vs Model")
         plt.xlabel("Feature " + description)
         plt.ylabel("Compressive Strength")
+        if (preprocessed):
+            plt.savefig('preprocessing-run/' + description + '.png', bbox_inches='tight')
+        else:
+            plt.savefig('non-preprocessing-run/' + description + '.png', bbox_inches='tight')
         plt.show()
 
 
@@ -139,17 +152,23 @@ def do_project(preprocess):
             xTv = X_test
             yTr = Y_train
             yTv = Y_test
-            train_all(xTr,xTv, yTr, yTv, False, "All")
+            train_all(xTr,xTv, yTr, yTv, False, "All", preprocess)
         else:
             xTr = X_train[i:i+1, :]
             xTv = X_test[i:i+1, :]
             yTr = Y_train[:, :]
             yTv = Y_test[:, :]
-            train_all(xTr,xTv, yTr, yTv, True, df.columns[i])
+            train_all(xTr,xTv, yTr, yTv, True, df.columns[i], preprocess)
 
 
+original_stdout = sys.stdout
 
-print("Beginning project without preprocessing...")
-do_project(False)
-print("Beginning project with preprocessing...")
-do_project(True)
+with open('preprocessing-run/output.txt', 'w') as f:
+    sys.stdout = f
+
+    # print("Beginning project without preprocessing...")
+    # do_project(False)
+    print("Beginning project with preprocessing...")
+    do_project(True)
+
+    sys.stdout = original_stdout
