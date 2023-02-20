@@ -4,9 +4,50 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn import preprocessing
+from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import KFold
 
 from do_training import train_ridge, train_mae, train_mse
 from stat_func import r_squared, loss_mae, loss_mse, loss_ridge, do_predict, do_split
+
+
+def doKFold(X, y, stepparams, k):
+
+    num_models = len(stepparams)
+
+    sq_errors_array_tr = [[None for i in range(k)] for j in range(num_models)]
+    sq_errors_array_te = [[None for i in range(k)] for j in range(num_models)]
+    average_sq_error_tr = [None] * num_models
+    average_sq_error_te = [None] * num_models
+
+    kfold = KFold(n_splits=k, shuffle=True, random_state=None)
+    folds = [next(kfold.split(X.T)) for i in range(k)]
+
+    for split_i in range(k):
+        X_tr= X.T[folds[split_i][0]].T
+        X_te = X.T[folds[split_i][1]].T
+        y_tr= y.T[folds[split_i][0]].T
+        y_te = y.T[folds[split_i][1]].T
+
+        for j in range(len(stepparams)):
+            mse_w_trained = train_mse(X_tr, y_tr, stepparams[j])
+            predictions_tr = do_predict(mse_w_trained, X_tr)
+            sq_errors_array_tr[j][split_i] = mean_squared_error(y_tr, predictions_tr)
+            predictions_te = do_predict(mse_w_trained, X_te)
+            sq_errors_array_te[j][split_i] = mean_squared_error(y_te, predictions_te)
+
+    bestparam = 0
+    avgerror = math.inf
+    for j in range(len(stepparams)):
+        average_sq_error_tr[j] = sum(sq_errors_array_tr[j])/k
+        average_sq_error_te[j] = sum(sq_errors_array_te[j])/k
+        print('Squared error of each fold - {}'.format(sq_errors_array_te[j]))
+        print('Avg squared error : {}'.format(average_sq_error_te[j]))
+        if (average_sq_error_te[j] < avgerror):
+            bestparam = j
+            avgerror = average_sq_error_te[j]
+
+    return stepparams[bestparam]
 
 
 def train_all(xTr, xTv, yTr, yTv, plots, description):
@@ -64,11 +105,12 @@ def do_project(preprocess):
     d = df.shape[1] - 1
 
     if (preprocess):
-        nrmlz = preprocessing.MinMaxScaler()
+        processor = preprocessing.MinMaxScaler()
+        # processor = preprocessing.StandardScaler()
         column_names = df.columns
-        df_fit = nrmlz.fit_transform(df)
-        df_nrmlz = pd.DataFrame(df_fit, columns=column_names)
-        train_df, test_df = do_split(df_nrmlz, 130)
+        df_fit = processor.fit_transform(df)
+        df_processed = pd.DataFrame(df_fit, columns=column_names)
+        train_df, test_df = do_split(df_processed, 130)
     else:
         train_df, test_df = do_split(df, 130)
 

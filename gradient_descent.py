@@ -22,6 +22,9 @@ def grdescent(func, w0, stepsize, maxiter, tolerance = 1e-2):
         prevLoss = loss
         loss, gradient = func(w)
 
+        # 1-t*s method
+        # stepsize = 1 - t * stepsize
+
         # 1.01/.5 method
         if (loss < prevLoss):
             stepsize = stepsize * 1.01
@@ -30,7 +33,7 @@ def grdescent(func, w0, stepsize, maxiter, tolerance = 1e-2):
 
         # 1/t method
         # stepsize = 1.0 / (t + 1)
-        w = w - stepsize * gradient
+        # w = w - stepsize * gradient
 
         if (np.linalg.norm(gradient, inf) <= tolerance):
             break
