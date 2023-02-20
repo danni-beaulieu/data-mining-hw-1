@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 import random
-from do_regresssion import ridge, maereg, msereg
+from do_regression import ridge, maereg, msereg, mseregstochastic
 from gradient_descent import grdescent
 
 def train_ridge(xTr,yTr, lambdaa):
@@ -22,8 +22,8 @@ def train_mse(xTr,yTr):
 # yTr
 #
 # OUTPUT: w_trained
-    f = lambda w: msereg(w, xTr, yTr)
-    w_trained = grdescent(f, init_w(np.zeros((xTr.shape[0], 1))), 1e-04, 10000)
+    f = lambda w: mseregstochastic(w, xTr, yTr)
+    w_trained = grdescent(f, init_w(np.zeros((xTr.shape[0], 1))), 1e-03, 10000)
     return w_trained
 
 

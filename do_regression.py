@@ -1,3 +1,6 @@
+import math
+import random
+
 import numpy as np
 
 
@@ -56,6 +59,30 @@ def msereg(w,xTr,yTr):
     gradient = gradient.reshape((-1, 1))
 
     return loss,gradient
+
+
+def mseregstochastic(w,xTr,yTr):
+#
+# INPUT:
+# w weight vector (default w=0)
+# xTr:dxn matrix (each column is an input vector)
+# yTr:1xn matrix (each entry is a label)
+#
+# OUTPUTS:
+# loss = the total loss obtained with w on xTr and yTr
+# gradient = the gradient at w
+#
+# [d,n]=size(xTr);
+
+    index = random.randint(0, xTr.shape[1] - 1)
+    xS = xTr[:,index].reshape((-1,1))
+    xw = np.dot(xS.T, w)
+    xwMinusy = xw - yTr[:,index]
+    g = 2 * xS.dot(xwMinusy) / yTr.shape[1]
+    gradient = g.reshape((g.shape[0],))
+    gradient = gradient.reshape((-1, 1))
+
+    return math.inf,gradient
 
 
 def maereg(w,xTr,yTr):
