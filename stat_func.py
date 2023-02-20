@@ -12,10 +12,10 @@ def r_squared(w, xT, yT):
     mse = XTwMinusyT_XTwMinusy / yT.shape[1]
 
     Y_bar = np.full((Y.shape[0], Y.shape[1]), np.mean(Y))
-    XTwMinusyBar = XTw - Y_bar
-    XTwMinusyBarT = XTwMinusyBar.transpose()
-    XTwMinusyBarT_XTwMinusyBar = XTwMinusyBarT.dot(XTwMinusyBar)
-    variance = XTwMinusyBarT_XTwMinusyBar / yT.shape[1]
+    YMinusyBar = Y - Y_bar
+    YMinusyBarT = YMinusyBar.transpose()
+    YMinusyBarT_YMinusyBar = YMinusyBarT.dot(YMinusyBar)
+    variance = YMinusyBarT_YMinusyBar / yT.shape[1]
 
     return (1 - (mse / variance))
 

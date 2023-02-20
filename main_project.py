@@ -11,7 +11,7 @@ from do_training import train_ridge, train_mae, train_mse
 from stat_func import r_squared, loss_mae, loss_mse, loss_ridge, do_predict, do_split
 
 
-def doKFold(X, y, stepparams, k):
+def doKFold(func, X, y, stepparams, k):
 
     num_models = len(stepparams)
 
@@ -30,10 +30,10 @@ def doKFold(X, y, stepparams, k):
         y_te = y.T[folds[split_i][1]].T
 
         for j in range(len(stepparams)):
-            mse_w_trained = train_mse(X_tr, y_tr, stepparams[j])
-            predictions_tr = do_predict(mse_w_trained, X_tr)
+            w_trained = func(X_tr, y_tr, stepparams[j])
+            predictions_tr = do_predict(w_trained, X_tr)
             sq_errors_array_tr[j][split_i] = mean_squared_error(y_tr, predictions_tr)
-            predictions_te = do_predict(mse_w_trained, X_te)
+            predictions_te = do_predict(w_trained, X_te)
             sq_errors_array_te[j][split_i] = mean_squared_error(y_te, predictions_te)
 
     bestparam = 0
@@ -56,7 +56,10 @@ def train_all(xTr, xTv, yTr, yTv, plots, description):
     bias = np.ones(shape=(1, xTv.shape[1]))
     xTv_bias = np.append(bias, xTv, axis=0)
 
-    mse_w_trained = train_mse(xTr_bias, yTr)
+    mse_bestparam = doKFold(train_mse, xTr_bias, yTr, [1e-02, 1e-03, 1e-04, 1e-05], 5)
+    print("MSE Best Eta ", mse_bestparam)
+
+    mse_w_trained = train_mse(xTr_bias, yTr, mse_bestparam)
     print("MSE Loss (Train) ", loss_mse(mse_w_trained, xTr_bias, yTr))
     print("MSE R-Squared (Train) ", r_squared(mse_w_trained, xTr_bias, yTr))
     print("MSE Loss (Test) ", loss_mse(mse_w_trained, xTv_bias, yTv))
@@ -70,8 +73,12 @@ def train_all(xTr, xTv, yTr, yTv, plots, description):
         plt.ylabel("Compressive Strength")
         plt.show()
 
-    lambdaa = 0.001
-    ridge_w_trained = train_ridge(xTr_bias, yTr, lambdaa)
+    train_ridge_f = lambda x,y,lambdaa: train_ridge(x,y, mse_bestparam, lambdaa)
+    ridge_bestparam = doKFold(train_ridge_f, xTr_bias, yTr, [1e-02, 1e-03, 1e-04, 1e-05], 5)
+    print("Ridge Best Eta ", ridge_bestparam)
+
+    lambdaa = ridge_bestparam
+    ridge_w_trained = train_ridge(xTr_bias, yTr, mse_bestparam, lambdaa)
     print("Ridge Loss (Train) ", loss_ridge(ridge_w_trained, xTr_bias, yTr, lambdaa))
     print("Ridge R-Squared (Train) ", r_squared(ridge_w_trained, xTr_bias, yTr))
     print("Ridge Loss (Test) ", loss_ridge(ridge_w_trained, xTv_bias, yTv, lambdaa))
@@ -85,7 +92,10 @@ def train_all(xTr, xTv, yTr, yTv, plots, description):
         plt.ylabel("Compressive Strength")
         plt.show()
 
-    mae_w_trained = train_mae(xTr_bias, yTr)
+    mae_bestparam = doKFold(train_mae, xTr_bias, yTr, [1e-02, 1e-03, 1e-04, 1e-05], 5)
+    print("MAE Best Eta ", mae_bestparam)
+
+    mae_w_trained = train_mae(xTr_bias, yTr,mae_bestparam)
     print("MAE Loss (Train) ", loss_mae(mae_w_trained, xTr_bias, yTr))
     print("MAE R-Squared (Train) ", r_squared(mae_w_trained, xTr_bias, yTr))
     print("MAE Loss (Test) ", loss_mae(mae_w_trained, xTv_bias, yTv))
