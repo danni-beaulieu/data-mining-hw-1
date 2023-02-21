@@ -163,7 +163,7 @@ def do_project(preprocess, params):
 
 original_stdout = sys.stdout
 
-with open('non-preprocessing-run/output.txt', 'w') as np_out:
+with open('trial-1/non-preprocessing-run/output.txt', 'w') as np_out:
     sys.stdout = np_out
 
     print("Beginning project without preprocessing...")
@@ -172,7 +172,7 @@ with open('non-preprocessing-run/output.txt', 'w') as np_out:
     sys.stdout = original_stdout
     np_out.close()
 
-with open('preprocessing-run/output.txt', 'w') as p_out:
+with open('trial-1/preprocessing-run/output.txt', 'w') as p_out:
     sys.stdout = p_out
     print("Beginning project with preprocessing...")
     # [1e-02, 1e-03, 1e-04, 1e-05]
