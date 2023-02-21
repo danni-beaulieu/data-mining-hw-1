@@ -51,7 +51,7 @@ def doKFold(func, X, y, stepparams, k):
     return stepparams[bestparam]
 
 
-def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed, params):
+def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed, params, trial):
     bias = np.ones(shape=(1, xTr.shape[1]))
     xTr_bias = np.append(bias, xTr, axis=0)
     bias = np.ones(shape=(1, xTv.shape[1]))
@@ -73,9 +73,9 @@ def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed, params):
         plt.xlabel("Feature " + description)
         plt.ylabel("Compressive Strength")
         if (preprocessed):
-            plt.savefig('preprocessing-run/mse/' + description + '.png', bbox_inches='tight')
+            plt.savefig('trial-' + str(trial) + '/preprocessing-run/mse/' + description + '.png', bbox_inches='tight')
         else:
-            plt.savefig('non-preprocessing-run/mse/' + description + '.png', bbox_inches='tight')
+            plt.savefig('trial-' + str(trial) + '/non-preprocessing-run/mse/' + description + '.png', bbox_inches='tight')
         plt.show()
 
     train_ridge_f = lambda x,y,lambdaa: train_ridge(x,y, mse_bestparam, lambdaa)
@@ -96,9 +96,9 @@ def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed, params):
         plt.xlabel("Feature " + description)
         plt.ylabel("Compressive Strength")
         if (preprocessed):
-            plt.savefig('preprocessing-run/ridge/' + description + '.png', bbox_inches='tight')
+            plt.savefig('trial-' + str(trial) + '/preprocessing-run/ridge/' + description + '.png', bbox_inches='tight')
         else:
-            plt.savefig('non-preprocessing-run/ridge/' + description + '.png', bbox_inches='tight')
+            plt.savefig('trial-' + str(trial) + '/non-preprocessing-run/ridge/' + description + '.png', bbox_inches='tight')
         plt.show()
 
     mae_bestparam = doKFold(train_mae, xTr_bias, yTr, params, 5)
@@ -117,13 +117,13 @@ def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed, params):
         plt.xlabel("Feature " + description)
         plt.ylabel("Compressive Strength")
         if (preprocessed):
-            plt.savefig('preprocessing-run/mae/' + description + '.png', bbox_inches='tight')
+            plt.savefig('trial-' + str(trial) + '/preprocessing-run/mae/' + description + '.png', bbox_inches='tight')
         else:
-            plt.savefig('non-preprocessing-run/mae/' + description + '.png', bbox_inches='tight')
+            plt.savefig('trial-' + str(trial) + '/non-preprocessing-run/mae/' + description + '.png', bbox_inches='tight')
         plt.show()
 
 
-def do_project(preprocess, params):
+def do_project(preprocess, params, trial):
     df = pd.read_csv("Concrete_Data.csv")
     d = df.shape[1] - 1
 
@@ -152,31 +152,32 @@ def do_project(preprocess, params):
             xTv = X_test
             yTr = Y_train
             yTv = Y_test
-            train_all(xTr,xTv, yTr, yTv, False, "All", preprocess, params)
+            train_all(xTr,xTv, yTr, yTv, False, "All", preprocess, params, trial)
         else:
             xTr = X_train[i:i+1, :]
             xTv = X_test[i:i+1, :]
             yTr = Y_train[:, :]
             yTv = Y_test[:, :]
-            train_all(xTr,xTv, yTr, yTv, True, df.columns[i], preprocess, params)
+            train_all(xTr,xTv, yTr, yTv, True, df.columns[i], preprocess, params, trial)
 
 
+trial = 3
 original_stdout = sys.stdout
 
-with open('trial-1/non-preprocessing-run/output.txt', 'w') as np_out:
+with open('trial-' + str(trial) + '/non-preprocessing-run/output.txt', 'w') as np_out:
     sys.stdout = np_out
 
     print("Beginning project without preprocessing...")
     # [1e-07, 1e-08, 1e-09, 1e-10]
-    do_project(False, [1e-07, 1e-08, 1e-09, 1e-10])
+    do_project(False, [1e-07, 1e-08, 1e-09, 1e-10], trial)
     sys.stdout = original_stdout
     np_out.close()
 
-with open('trial-1/preprocessing-run/output.txt', 'w') as p_out:
+with open('trial-' + str(trial) + '/preprocessing-run/output.txt', 'w') as p_out:
     sys.stdout = p_out
     print("Beginning project with preprocessing...")
     # [1e-02, 1e-03, 1e-04, 1e-05]
-    do_project(True, [1e-02, 1e-03, 1e-04, 1e-05])
+    do_project(True, [1e-02, 1e-03, 1e-04, 1e-05], trial)
 
     sys.stdout = original_stdout
     p_out.close()
