@@ -1,4 +1,5 @@
 import math
+import os
 import sys
 
 import numpy as np
@@ -13,7 +14,6 @@ from stat_func import r_squared, loss_mae, loss_mse, loss_ridge, do_predict, do_
 
 
 def doKFold(func, X, y, stepparams, k):
-
     num_models = len(stepparams)
 
     sq_errors_array_tr = [[None for i in range(k)] for j in range(num_models)]
@@ -25,9 +25,9 @@ def doKFold(func, X, y, stepparams, k):
     folds = [next(kfold.split(X.T)) for i in range(k)]
 
     for split_i in range(k):
-        X_tr= X.T[folds[split_i][0]].T
+        X_tr = X.T[folds[split_i][0]].T
         X_te = X.T[folds[split_i][1]].T
-        y_tr= y.T[folds[split_i][0]].T
+        y_tr = y.T[folds[split_i][0]].T
         y_te = y.T[folds[split_i][1]].T
 
         for j in range(len(stepparams)):
@@ -40,8 +40,8 @@ def doKFold(func, X, y, stepparams, k):
     bestparam = 0
     avgerror = math.inf
     for j in range(len(stepparams)):
-        average_sq_error_tr[j] = sum(sq_errors_array_tr[j])/k
-        average_sq_error_te[j] = sum(sq_errors_array_te[j])/k
+        average_sq_error_tr[j] = sum(sq_errors_array_tr[j]) / k
+        average_sq_error_te[j] = sum(sq_errors_array_te[j]) / k
         print('Squared error of each fold - {}'.format(sq_errors_array_te[j]))
         print('Avg squared error : {}'.format(average_sq_error_te[j]))
         if (average_sq_error_te[j] < avgerror):
@@ -75,10 +75,11 @@ def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed, params, tria
         if (preprocessed):
             plt.savefig('trial-' + str(trial) + '/preprocessing-run/mse/' + description + '.png', bbox_inches='tight')
         else:
-            plt.savefig('trial-' + str(trial) + '/non-preprocessing-run/mse/' + description + '.png', bbox_inches='tight')
+            plt.savefig('trial-' + str(trial) + '/non-preprocessing-run/mse/' + description + '.png',
+                        bbox_inches='tight')
         plt.show()
 
-    train_ridge_f = lambda x,y,lambdaa: train_ridge(x,y, mse_bestparam, lambdaa)
+    train_ridge_f = lambda x, y, lambdaa: train_ridge(x, y, mse_bestparam, lambdaa)
     ridge_bestparam = doKFold(train_ridge_f, xTr_bias, yTr, params, 5)
     print("Ridge Best Eta ", ridge_bestparam)
 
@@ -89,7 +90,7 @@ def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed, params, tria
     print("Ridge Loss (Test) ", loss_ridge(ridge_w_trained, xTv_bias, yTv, lambdaa))
     print("Ridge R-Squared (Test) ", r_squared(ridge_w_trained, xTv_bias, yTv))
     ridge_preds = do_predict(ridge_w_trained, xTr_bias)
-    if(plots):
+    if (plots):
         plt.scatter(xTr[0], yTr[0], color='green', alpha=.5)
         plt.plot(xTr[0], ridge_preds[0], color='purple', lw=5)
         plt.title("Ridge Regression: Data vs Model")
@@ -98,13 +99,14 @@ def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed, params, tria
         if (preprocessed):
             plt.savefig('trial-' + str(trial) + '/preprocessing-run/ridge/' + description + '.png', bbox_inches='tight')
         else:
-            plt.savefig('trial-' + str(trial) + '/non-preprocessing-run/ridge/' + description + '.png', bbox_inches='tight')
+            plt.savefig('trial-' + str(trial) + '/non-preprocessing-run/ridge/' + description + '.png',
+                        bbox_inches='tight')
         plt.show()
 
     mae_bestparam = doKFold(train_mae, xTr_bias, yTr, params, 5)
     print("MAE Best Eta ", mae_bestparam)
 
-    mae_w_trained = train_mae(xTr_bias, yTr,mae_bestparam)
+    mae_w_trained = train_mae(xTr_bias, yTr, mae_bestparam)
     print("MAE Loss (Train) ", loss_mae(mae_w_trained, xTr_bias, yTr))
     print("MAE R-Squared (Train) ", r_squared(mae_w_trained, xTr_bias, yTr))
     print("MAE Loss (Test) ", loss_mae(mae_w_trained, xTv_bias, yTv))
@@ -119,7 +121,8 @@ def train_all(xTr, xTv, yTr, yTv, plots, description, preprocessed, params, tria
         if (preprocessed):
             plt.savefig('trial-' + str(trial) + '/preprocessing-run/mae/' + description + '.png', bbox_inches='tight')
         else:
-            plt.savefig('trial-' + str(trial) + '/non-preprocessing-run/mae/' + description + '.png', bbox_inches='tight')
+            plt.savefig('trial-' + str(trial) + '/non-preprocessing-run/mae/' + description + '.png',
+                        bbox_inches='tight')
         plt.show()
 
 
@@ -140,31 +143,40 @@ def do_project(preprocess, params, trial):
     raw_data_train = train_df.to_numpy()
     raw_data_test = test_df.to_numpy()
 
-    X_train = raw_data_train[:,0:(raw_data_train.shape[1] - 1)].T
-    Y_train = raw_data_train[:, (raw_data_train.shape[1] - 1)].reshape(1,-1)
-    X_test = raw_data_test[:,0:(raw_data_test.shape[1] - 1)].T
-    Y_test = raw_data_test[:, (raw_data_test.shape[1] - 1)].reshape(1,-1)
+    X_train = raw_data_train[:, 0:(raw_data_train.shape[1] - 1)].T
+    Y_train = raw_data_train[:, (raw_data_train.shape[1] - 1)].reshape(1, -1)
+    X_test = raw_data_test[:, 0:(raw_data_test.shape[1] - 1)].T
+    Y_test = raw_data_test[:, (raw_data_test.shape[1] - 1)].reshape(1, -1)
 
-    for i in range (-1,d):
+    for i in range(-1, d):
         print("Working with feature: ", i)
         if (i == -1):
             xTr = X_train
             xTv = X_test
             yTr = Y_train
             yTv = Y_test
-            train_all(xTr,xTv, yTr, yTv, False, "All", preprocess, params, trial)
+            train_all(xTr, xTv, yTr, yTv, False, "All", preprocess, params, trial)
         else:
-            xTr = X_train[i:i+1, :]
-            xTv = X_test[i:i+1, :]
+            xTr = X_train[i:i + 1, :]
+            xTv = X_test[i:i + 1, :]
             yTr = Y_train[:, :]
             yTv = Y_test[:, :]
-            train_all(xTr,xTv, yTr, yTv, True, df.columns[i], preprocess, params, trial)
+            train_all(xTr, xTv, yTr, yTv, True, df.columns[i], preprocess, params, trial)
 
 
-trial = 3
+try:
+    trial = sys.argv[1]
+except Exception as e:
+    print("ERROR: ", e)
+    print("ERROR: no input argument for trial number")
+    print("ERROR: falling back to use default of 'trial-0'")
+    trial = 0
 original_stdout = sys.stdout
 
-with open('trial-' + str(trial) + '/non-preprocessing-run/output.txt', 'w') as np_out:
+os.makedirs('trial-' + str(trial) + '/non-preprocessing-run/mse', exist_ok=True)
+os.makedirs('trial-' + str(trial) + '/non-preprocessing-run/ridge', exist_ok=True)
+os.makedirs('trial-' + str(trial) + '/non-preprocessing-run/mae', exist_ok=True)
+with open('trial-' + str(trial) + '/non-preprocessing-run/output.txt', 'w+') as np_out:
     sys.stdout = np_out
 
     print("Beginning project without preprocessing...")
@@ -173,7 +185,10 @@ with open('trial-' + str(trial) + '/non-preprocessing-run/output.txt', 'w') as n
     sys.stdout = original_stdout
     np_out.close()
 
-with open('trial-' + str(trial) + '/preprocessing-run/output.txt', 'w') as p_out:
+os.makedirs('trial-' + str(trial) + '/preprocessing-run/mse', exist_ok=True)
+os.makedirs('trial-' + str(trial) + '/preprocessing-run/ridge', exist_ok=True)
+os.makedirs('trial-' + str(trial) + '/preprocessing-run/mae', exist_ok=True)
+with open('trial-' + str(trial) + '/preprocessing-run/output.txt', 'w+') as p_out:
     sys.stdout = p_out
     print("Beginning project with preprocessing...")
     # [1e-02, 1e-03, 1e-04, 1e-05]
