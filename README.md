@@ -16,4 +16,4 @@ python3 main_project.py 5
 ```
 
 IDE: 
-![](../../../Desktop/Screenshot 2023-03-01 at 8.37.51 PM.png)
+<img width="1043" alt="Screenshot 2023-03-01 at 8 37 51 PM" src="https://user-images.githubusercontent.com/37153975/227816972-99568fed-9e8d-41b3-a669-a3e0cd1411f2.png">
